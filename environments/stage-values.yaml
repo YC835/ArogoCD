@@ -2,7 +2,7 @@ replicaCount: 3
 
 image:
   repository: nginx
-  tag: stage
+  tag: latest
   pullPolicy: IfNotPresent
 
 service:
