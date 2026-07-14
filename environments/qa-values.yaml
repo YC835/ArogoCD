@@ -1,0 +1,10 @@
+replicaCount: 2
+
+image:
+  repository: nginx
+  tag: qa
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
