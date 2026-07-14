@@ -90,14 +90,14 @@ echo "=============================="
 echo "Enable HTTP mode"
 echo "=============================="
 
-kubectl patch configmap argocd-cmd-params-cm \
--n argocd \
---type merge \
--p '{"data":{"server.insecure":"true"}}'
+# kubectl patch configmap argocd-cmd-params-cm \
+# -n argocd \
+# --type merge \
+# -p '{"data":{"server.insecure":"true"}}'
 
-kubectl rollout restart deployment argocd-server -n argocd
+# kubectl rollout restart deployment argocd-server -n argocd
 
-kubectl rollout status deployment argocd-server -n argocd --timeout=300s
+# kubectl rollout status deployment argocd-server -n argocd --timeout=300s
 
 echo
 echo "=============================="
