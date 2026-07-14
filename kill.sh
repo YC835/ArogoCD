@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 echo "=============================="
 echo "Installing required packages"
@@ -34,7 +34,42 @@ kubectl apply --server-side \
 
 echo
 echo "=============================="
-echo "Waiting for Argo CD"
+echo "Waiting for Argo CD resources to be created"
+echo "=============================="
+
+until kubectl get statefulset argocd-application-controller -n argocd >/dev/null 2>&1; do
+    echo "Waiting for StatefulSet..."
+    sleep 2
+done
+
+until kubectl get deployment argocd-server -n argocd >/dev/null 2>&1; do
+    echo "Waiting for argocd-server..."
+    sleep 2
+done
+
+until kubectl get deployment argocd-repo-server -n argocd >/dev/null 2>&1; do
+    echo "Waiting for argocd-repo-server..."
+    sleep 2
+done
+
+until kubectl get deployment argocd-applicationset-controller -n argocd >/dev/null 2>&1; do
+    echo "Waiting for argocd-applicationset-controller..."
+    sleep 2
+done
+
+until kubectl get deployment argocd-dex-server -n argocd >/dev/null 2>&1; do
+    echo "Waiting for argocd-dex-server..."
+    sleep 2
+done
+
+until kubectl get deployment argocd-notifications-controller -n argocd >/dev/null 2>&1; do
+    echo "Waiting for argocd-notifications-controller..."
+    sleep 2
+done
+
+echo
+echo "=============================="
+echo "Waiting for Argo CD rollout"
 echo "=============================="
 
 kubectl rollout status statefulset/argocd-application-controller -n argocd --timeout=600s
@@ -73,17 +108,35 @@ kubectl -n argocd get secret argocd-initial-admin-secret \
 
 echo
 echo
+
 echo "=============================="
 echo "Start Port Forward"
 echo "=============================="
 
+nohup kubectl port-forward svc/argocd-server \
+-n argocd \
+9090:80 \
+--address 0.0.0.0 \
+>/tmp/argocd-port-forward.log 2>&1 &
+
+sleep 3
+
+if pgrep -f "kubectl port-forward.*argocd-server" >/dev/null; then
+    echo "✓ Port-forward started successfully."
+else
+    echo "✗ Port-forward failed."
+    cat /tmp/argocd-port-forward.log
+    exit 1
+fi
+
 echo
-echo "Run the command below in another terminal:"
-echo
-echo "kubectl port-forward svc/argocd-server -n argocd 9090:80 --address 0.0.0.0"
-echo
-echo "Expose Port 9090 in Killercoda."
-echo
-echo "Open:"
-echo
+echo "=============================="
+echo "Access Argo CD"
+echo "=============================="
+
+echo "URL:"
 echo "http://<killercoda-session>-9090....killercoda.com"
+
+echo
+echo "Username: admin"
+echo "Password: (shown above)"
